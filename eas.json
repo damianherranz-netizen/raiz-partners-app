@@ -16,12 +16,6 @@
     "production": {
       "android": {
         "buildType": "app-bundle"
-      },
-      "env": {
-        "NODE_ENV": "production"
-      },
-      "npm": {
-        "legacy-peer-deps": true
       }
     }
   },
