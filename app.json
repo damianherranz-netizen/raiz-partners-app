@@ -1,25 +1,33 @@
 {
   "expo": {
-    "name": "raiz-partners-app",
+    "name": "RAÍZ Partners",
     "slug": "raiz-partners-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme": "raizpartners",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "es.raizmarket.partners"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f1f0c"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "es.raizmarket.partners"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#166534",
+          "sounds": []
+        }
+      ]
+    ]
   }
 }
