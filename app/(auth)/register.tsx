@@ -38,6 +38,15 @@ const PERFILES = [
     bg: 'rgba(245,158,11,0.08)',
     border: 'rgba(245,158,11,0.2)',
   },
+  {
+    id: 'transformer',
+    emoji: '🏭',
+    nombre: 'Soy transformador',
+    desc: 'Matadero, carnicería, quesería, bodega, almazara u otra industria transformadora del campo.',
+    color: '#DC2626',
+    bg: 'rgba(220,38,38,0.08)',
+    border: 'rgba(220,38,38,0.2)',
+  },
 ]
 
 export default function RegisterScreen() {

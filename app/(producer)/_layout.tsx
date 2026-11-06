@@ -30,7 +30,8 @@ function MenuModal({ visible, onClose }: { visible: boolean; onClose: () => void
   }
 
   const opciones = [
-    { emoji: '📦', label: 'Mis ventas',            ruta: '/(producer)/products' },
+    { emoji: '�', label: 'Mi carrito',            ruta: '/(producer)/carrito' },
+    { emoji: '�📦', label: 'Mis ventas',            ruta: '/(producer)/products' },
     { emoji: '🧾', label: 'Mis pedidos',            ruta: '/(producer)/orders' },
     { emoji: '💶', label: 'Ayudas y subvenciones',  ruta: '/(producer)/subvenciones' },
     { emoji: '📄', label: 'Documentos',             ruta: '/(producer)/documentos' },
@@ -139,7 +140,9 @@ export default function ProducerLayout() {
         <Tabs.Screen name="products"      options={{ href: null }} />
         <Tabs.Screen name="orders"        options={{ href: null }} />
         <Tabs.Screen name="subvenciones"  options={{ href: null }} />
-        <Tabs.Screen name="documentos"    options={{ href: null }} />
+        <Tabs.Screen name="documentos"         options={{ href: null }} />
+        <Tabs.Screen name="carrito"            options={{ href: null }} />
+        <Tabs.Screen name="producto-detalle"   options={{ href: null }} />
         <Tabs.Screen name="profile"       options={{ href: null }} />
       </Tabs>
     </>

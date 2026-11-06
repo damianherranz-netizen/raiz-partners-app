@@ -1,86 +1,72 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import * as Notifications from 'expo-notifications'
 import { AuthProvider, useAuth } from '../lib/auth'
-import {
-  registerForPushNotifications,
-  savePushToken,
-  deletePushToken
-} from '../lib/notifications'
+import { CartProvider } from '../lib/cart'
+import { registerForPushNotifications, savePushToken } from '../lib/notifications'
+
+const GRUPO_POR_ROL: Record<string, string> = {
+  producer:     '(producer)',
+  provider:     '(provider)',
+  transporter:  '(transporter)',
+  professional: '(professional)',
+  transformer:  '(transformer)',
+  admin:        '(producer)',
+}
 
 function RootLayoutNav() {
-  const { session, profile, loading, signOut } = useAuth()
+  const { session, profile, loading } = useAuth()
   const segments = useSegments()
   const router = useRouter()
-  const notificationListener = useRef<any>()
-  const responseListener = useRef<any>()
+
+  const rol: string | undefined =
+    (profile as any)?.role ?? (profile as any)?.user_role
+  const perfilEsDeEstaSesion =
+    !!profile && !!session && (profile as any).id === session.user.id
+  const destino = GRUPO_POR_ROL[rol ?? ''] ?? '(producer)'
 
   useEffect(() => {
     if (loading) return
+    const grupo = segments[0] as string | undefined
 
-    const inAuth = segments[0] === '(auth)'
-
-    if (!session && !inAuth) {
-      router.replace('/(auth)/welcome')
-    } else if (session && profile && inAuth) {
-      const role = profile.user_role
-      if (role === 'producer')        router.replace('/(producer)')
-      else if (role === 'provider')   router.replace('/(provider)')
-      else if (role === 'transporter') router.replace('/(transporter)')
-      else if (role === 'professional')  router.replace('/(professional)')
-      else                             router.replace('/(producer)')
+    if (!session) {
+      if (grupo !== '(auth)') router.replace('/(auth)/welcome')
+      return
     }
-  }, [session, profile, loading])
 
-  // Registrar notificaciones cuando hay sesión
+    // Espera a que el perfil cargado sea el de esta sesión
+    if (!perfilEsDeEstaSesion) return
+
+
+    if (grupo !== destino) router.replace(`/${destino}` as any)
+  }, [session, profile, loading, segments])
+
   useEffect(() => {
     if (!session?.user) return
 
-    // Registrar token
     registerForPushNotifications().then((token) => {
-      if (token && session.user) {
-        savePushToken(session.user.id, token)
-      }
+      if (token && session.user) savePushToken(session.user.id, token)
     })
 
-    // Solo activar listeners si Notifications está disponible
+    let subA: any
+    let subB: any
     try {
       const { Notifications: N } = require('../lib/notifications')
       if (N) {
-        notificationListener.current = N.addNotificationReceivedListener(
-          (notification: any) => {
-            console.log('Notificación recibida:', notification)
-          }
-        )
-        responseListener.current = N.addNotificationResponseReceivedListener(
-          (response: any) => {
-            const data = response.notification.request.content.data
-            if (data?.type === 'message') {
-              const role = profile?.user_role ?? 'producer'
-              if (role === 'producer')         router.push('/(producer)/mensajes')
-              else if (role === 'provider')    router.push('/(provider)/mensajes')
-              else if (role === 'transporter') router.push('/(transporter)/mensajes')
-            }
-          }
-        )
+        subA = N.addNotificationReceivedListener(() => {})
+        subB = N.addNotificationResponseReceivedListener((response: any) => {
+          const data = response.notification.request.content.data
+          if (data?.type === 'message') router.push(`/${destino}/mensajes` as any)
+        })
       }
     } catch (e) {
-      console.log('Listeners de notificaciones no disponibles en Expo Go')
+      console.log('Notificaciones no disponibles en Expo Go')
     }
 
     return () => {
-      try {
-        const { Notifications: N } = require('../lib/notifications')
-        if (N) {
-          if (notificationListener.current)
-            N.removeNotificationSubscription(notificationListener.current)
-          if (responseListener.current)
-            N.removeNotificationSubscription(responseListener.current)
-        }
-      } catch (e) {}
+      try { subA?.remove?.(); subB?.remove?.() } catch (e) {}
     }
-  }, [session])
+  }, [session?.user?.id])
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -88,6 +74,8 @@ function RootLayoutNav() {
       <Stack.Screen name="(producer)" />
       <Stack.Screen name="(provider)" />
       <Stack.Screen name="(transporter)" />
+      <Stack.Screen name="(professional)" />
+      <Stack.Screen name="(transformer)" />
     </Stack>
   )
 }
@@ -96,7 +84,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <StatusBar style="auto" />
-      <RootLayoutNav />
+      <CartProvider>
+        <RootLayoutNav />
+      </CartProvider>
     </AuthProvider>
   )
 }

@@ -46,7 +46,8 @@ export default function RegisterFormScreen() {
     })
     setLoading(false)
     if (error) {
-      Alert.alert('Error al registrarte', error.message)
+      console.log('SIGNUP ERROR:', JSON.stringify(error))
+      Alert.alert('Error al registrarte', `${error.message} | status: ${error.status}`)
     } else {
       Alert.alert(
         '¡Cuenta creada! 🌱',

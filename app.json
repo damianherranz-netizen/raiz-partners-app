@@ -28,6 +28,12 @@
           "sounds": []
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c8d389e8-54d3-4652-a13b-c7b374678eea"
+      }
+    }
   }
 }

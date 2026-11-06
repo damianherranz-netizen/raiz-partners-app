@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView,
   TextInput, TouchableOpacity, Image, RefreshControl
 } from 'react-native'
+import { useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
 import { C } from '../../lib/colors'
 import Header from '../../components/ui/Header'
@@ -19,6 +20,7 @@ type Producto = {
 const CATEGORIAS = ['Todo', 'Piensos', 'Semillas', 'Maquinaria', 'Herramientas', 'Veterinaria', 'Otros']
 
 export default function TiendaScreen() {
+  const router = useRouter()
   const [productos, setProductos] = useState<Producto[]>([])
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState('Todo')
@@ -114,7 +116,15 @@ export default function TiendaScreen() {
         ) : (
           <View style={styles.grid}>
             {productos.map((p) => (
-              <View key={p.id} style={styles.productoCard}>
+              <TouchableOpacity
+                key={p.id}
+                style={styles.productoCard}
+                onPress={() => router.push({
+                  pathname: '/(producer)/producto-detalle',
+                  params: { id: p.id }
+                })}
+                activeOpacity={0.85}
+              >
                 {p.images && p.images[0] ? (
                   <Image source={{ uri: p.images[0] }} style={styles.productoImg} />
                 ) : (
@@ -130,11 +140,11 @@ export default function TiendaScreen() {
                   <Text style={styles.productoPrecio}>
                     {p.price} € / {p.unit_type}
                   </Text>
-                  <TouchableOpacity style={styles.btnComprar}>
-                    <Text style={styles.btnComprarText}>Contactar</Text>
-                  </TouchableOpacity>
+                  <View style={styles.btnComprar}>
+                    <Text style={styles.btnComprarText}>Ver producto →</Text>
+                  </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
