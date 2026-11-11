@@ -15,6 +15,7 @@ const ACCIONES = [
   { emoji: '🛒', label: 'Mi carrito',         ruta: '/(transformer)/carrito' },
   { emoji: '💬', label: 'Mis mensajes',       ruta: '/(transformer)/mensajes' },
   { emoji: '👤', label: 'Mi perfil',          ruta: '/(transformer)/profile' },
+  { emoji: '✅', label: 'Verificar cuenta', ruta: '/verificacion' },
 ]
 
 export default function TransformerDashboard() {

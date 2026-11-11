@@ -5,6 +5,7 @@ import {
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
+import { getVerifiedSet } from '../../lib/verified'
 import { C } from '../../lib/colors'
 import Header from '../../components/ui/Header'
 
@@ -15,6 +16,7 @@ type Producto = {
   unit_type: string
   images: string[] | null
   description: string | null
+  provider_id?: string
 }
 
 const CATEGORIAS = ['Todo', 'Piensos', 'Semillas', 'Maquinaria', 'Herramientas', 'Veterinaria', 'Otros']
@@ -26,13 +28,14 @@ export default function TiendaScreen() {
   const [categoria, setCategoria] = useState('Todo')
   const [refreshing, setRefreshing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [verificados, setVerificados] = useState<Set<string>>(new Set())
 
   useEffect(() => { loadProductos() }, [busqueda, categoria])
 
   async function loadProductos() {
     let query = supabase
       .from('provider_products')
-      .select('id, name, price, unit_type, images, description')
+      .select('id, name, price, unit_type, images, description, provider_id')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(50)
@@ -43,6 +46,7 @@ export default function TiendaScreen() {
 
     const { data } = await query
     setProductos(data ?? [])
+    setVerificados(await getVerifiedSet((data ?? []).map((p: any) => p.provider_id)))
     setLoading(false)
   }
 
@@ -134,6 +138,9 @@ export default function TiendaScreen() {
                 )}
                 <View style={styles.productoInfo}>
                   <Text style={styles.productoNombre} numberOfLines={2}>{p.name}</Text>
+                  {p.provider_id && verificados.has(p.provider_id) && (
+                    <Text style={styles.verificado}>✓ Vendedor verificado</Text>
+                  )}
                   {p.description && (
                     <Text style={styles.productoDesc} numberOfLines={1}>{p.description}</Text>
                   )}
@@ -154,6 +161,7 @@ export default function TiendaScreen() {
 }
 
 const styles = StyleSheet.create({
+  verificado: { fontSize: 11, fontWeight: '700', color: '#166534' },
   flex:   { flex: 1, backgroundColor: C.bg },
   buscadorWrap: {
     backgroundColor: C.white,

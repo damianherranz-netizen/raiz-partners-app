@@ -177,6 +177,8 @@ export default function ProductsScreen() {
   }
 
   async function saveProduct() {
+    const { ensureVerified } = require('../../lib/verification')
+    if (!(await ensureVerified())) return
     if (!name || !price) {
       Alert.alert('Faltan datos', 'Añade el nombre y el precio')
       return

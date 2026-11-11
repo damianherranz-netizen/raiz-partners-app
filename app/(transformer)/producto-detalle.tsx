@@ -5,6 +5,7 @@ import {
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
+import { getVerifiedSet } from '../../lib/verified'
 import { useCart } from '../../lib/cart'
 import { C } from '../../lib/colors'
 import Header from '../../components/ui/Header'
@@ -65,6 +66,12 @@ export default function ProductoDetalleScreen() {
   const [producto, setProducto] = useState<Producto | null>(null)
   const [fotoActiva, setFotoActiva] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [verificado, setVerificado] = useState(false)
+  useEffect(() => {
+    const sid = producto?.provider_id
+    if (!sid) return
+    getVerifiedSet([sid]).then(s => setVerificado(s.has(sid)))
+  }, [producto?.provider_id])
 
   useEffect(() => {
     if (id) loadProducto()
@@ -231,7 +238,7 @@ export default function ProductoDetalleScreen() {
           )}
           <Text style={styles.precio}>{producto.price} € / {producto.unit_type}</Text>
           {producto.profiles?.full_name && (
-            <Text style={styles.proveedor}>🏢 {producto.profiles.full_name}</Text>
+            <Text style={styles.proveedor}>🏢 {producto.profiles.full_name}{verificado ? '   ✓ Vendedor verificado' : ''}</Text>
           )}
         </View>
 

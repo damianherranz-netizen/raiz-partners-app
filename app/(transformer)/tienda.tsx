@@ -5,6 +5,7 @@ import {
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
+import { getVerifiedSet } from '../../lib/verified'
 import { C } from '../../lib/colors'
 import Header from '../../components/ui/Header'
 
@@ -19,6 +20,7 @@ type Producto = {
   description: string | null
   tipo: 'proveedor' | 'productor'
   tipo_producto?: string | null
+  seller_id?: string
 }
 
 const CATEGORIAS = [
@@ -36,6 +38,7 @@ export default function TransformerTiendaScreen() {
   const [categoria, setCategoria] = useState('todo')
   const [refreshing, setRefreshing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [verificados, setVerificados] = useState<Set<string>>(new Set())
 
   useEffect(() => { loadProductos() }, [busqueda])
 
@@ -45,7 +48,7 @@ export default function TransformerTiendaScreen() {
     // Productos de proveedores
     let q1 = supabase
       .from('provider_products')
-      .select('id, name, price, unit_type, images, description')
+      .select('id, name, price, unit_type, images, description, provider_id')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(30)
@@ -55,7 +58,7 @@ export default function TransformerTiendaScreen() {
     // Productos de productores (animales, carne, etc.)
     let q2 = supabase
       .from('products')
-      .select('id, name, price_per_kg, unit_type, images, tipo_producto')
+      .select('id, name, price_per_kg, unit_type, images, tipo_producto, producer_id')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(30)
@@ -70,6 +73,7 @@ export default function TransformerTiendaScreen() {
       images: p.images,
       description: p.description,
       tipo: 'proveedor',
+      seller_id: p.provider_id,
     }))
 
     const productorItems: Producto[] = (prodData ?? []).map((p: any) => ({
@@ -80,6 +84,7 @@ export default function TransformerTiendaScreen() {
       images: p.images,
       description: null,
       tipo: 'productor',
+      seller_id: p.producer_id,
       tipo_producto: p.tipo_producto,
     }))
 
@@ -107,6 +112,7 @@ export default function TransformerTiendaScreen() {
     }
 
     setProductos(todos)
+    setVerificados(await getVerifiedSet(todos.map(p => p.seller_id)))
     setLoading(false)
   }
 
@@ -208,6 +214,9 @@ export default function TransformerTiendaScreen() {
                     </View>
                   </View>
                   <Text style={styles.productoNombre} numberOfLines={2}>{p.name}</Text>
+                  {p.seller_id && verificados.has(p.seller_id) && (
+                    <Text style={styles.verificado}>✓ Vendedor verificado</Text>
+                  )}
                   {p.description && (
                     <Text style={styles.productoDesc} numberOfLines={1}>{p.description}</Text>
                   )}
@@ -228,6 +237,7 @@ export default function TransformerTiendaScreen() {
 }
 
 const styles = StyleSheet.create({
+  verificado: { fontSize: 11, fontWeight: '700', color: '#166534' },
   flex:   { flex: 1, backgroundColor: C.bg },
   buscadorWrap: {
     backgroundColor: C.white, paddingHorizontal: 16,

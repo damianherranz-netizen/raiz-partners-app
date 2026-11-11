@@ -14,6 +14,8 @@ const GRUPO_POR_ROL: Record<string, string> = {
   admin:        '(producer)',
 }
 
+const RUTAS_LIBRES = ['verificacion']
+
 function RootLayoutNav() {
   const { session, profile, loading } = useAuth()
   const segments = useSegments()
@@ -34,10 +36,8 @@ function RootLayoutNav() {
       return
     }
 
-    // Espera a que el perfil cargado sea el de esta sesión
     if (!perfilEsDeEstaSesion) return
-
-
+    if (grupo && RUTAS_LIBRES.includes(grupo)) return
     if (grupo !== destino) router.replace(`/${destino}` as any)
   }, [session, profile, loading, segments])
 
@@ -76,6 +76,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(transporter)" />
       <Stack.Screen name="(professional)" />
       <Stack.Screen name="(transformer)" />
+      <Stack.Screen name="verificacion" />
     </Stack>
   )
 }

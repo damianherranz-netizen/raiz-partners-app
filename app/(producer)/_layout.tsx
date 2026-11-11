@@ -37,6 +37,7 @@ function MenuModal({ visible, onClose }: { visible: boolean; onClose: () => void
     { emoji: '📄', label: 'Documentos',             ruta: '/(producer)/documentos' },
     { emoji: '🎓', label: 'Directorio profesionales', ruta: '/(producer)/profesionales' },
     { emoji: '👤', label: 'Mi perfil',              ruta: '/(producer)/profile' },
+    { emoji: '✅', label: 'Verificar mi cuenta', ruta: '/verificacion' },
   ]
 
   return (
