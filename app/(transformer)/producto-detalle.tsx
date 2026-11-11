@@ -238,7 +238,9 @@ export default function ProductoDetalleScreen() {
           )}
           <Text style={styles.precio}>{producto.price} € / {producto.unit_type}</Text>
           {producto.profiles?.full_name && (
-            <Text style={styles.proveedor}>🏢 {producto.profiles.full_name}{verificado ? '   ✓ Vendedor verificado' : ''}</Text>
+            <TouchableOpacity disabled={!verificado} onPress={() => router.push({ pathname: '/vendedor', params: { id: producto.provider_id } } as any)}>
+              <Text style={styles.proveedor}>🏢 {producto.profiles.full_name}{verificado ? '   ✓ Vendedor verificado ›' : ''}</Text>
+            </TouchableOpacity>
           )}
         </View>
 

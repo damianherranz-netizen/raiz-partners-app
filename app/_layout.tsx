@@ -14,7 +14,7 @@ const GRUPO_POR_ROL: Record<string, string> = {
   admin:        '(producer)',
 }
 
-const RUTAS_LIBRES = ['verificacion']
+const RUTAS_LIBRES = ['verificacion', 'vendedor']
 
 function RootLayoutNav() {
   const { session, profile, loading } = useAuth()
@@ -77,6 +77,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(professional)" />
       <Stack.Screen name="(transformer)" />
       <Stack.Screen name="verificacion" />
+      <Stack.Screen name="vendedor" />
     </Stack>
   )
 }

@@ -312,7 +312,7 @@ export default function VerificacionScreen() {
             {acepto ? <Text style={{ color: C.white, fontWeight: '700' }}>✓</Text> : null}
           </View>
           <Text style={styles.aceptoTexto}>
-            Declaro que los datos y documentos son ciertos y autorizo a RAÍZ a verificarlos.
+            Declaro que los datos y documentos son ciertos y autorizo a RAÍZ a verificarlos y a mostrar el nombre de mi explotación o empresa, mi provincia y mi municipio en mi perfil público de vendedor.
           </Text>
         </TouchableOpacity>
 

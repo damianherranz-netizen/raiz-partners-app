@@ -139,7 +139,9 @@ export default function TiendaScreen() {
                 <View style={styles.productoInfo}>
                   <Text style={styles.productoNombre} numberOfLines={2}>{p.name}</Text>
                   {p.provider_id && verificados.has(p.provider_id) && (
-                    <Text style={styles.verificado}>✓ Vendedor verificado</Text>
+                    <TouchableOpacity onPress={() => router.push({ pathname: '/vendedor', params: { id: p.provider_id } } as any)}>
+                      <Text style={styles.verificado}>✓ Vendedor verificado ›</Text>
+                    </TouchableOpacity>
                   )}
                   {p.description && (
                     <Text style={styles.productoDesc} numberOfLines={1}>{p.description}</Text>

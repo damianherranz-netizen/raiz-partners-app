@@ -215,7 +215,9 @@ export default function TransformerTiendaScreen() {
                   </View>
                   <Text style={styles.productoNombre} numberOfLines={2}>{p.name}</Text>
                   {p.seller_id && verificados.has(p.seller_id) && (
-                    <Text style={styles.verificado}>✓ Vendedor verificado</Text>
+                    <TouchableOpacity onPress={() => router.push({ pathname: '/vendedor', params: { id: p.seller_id } } as any)}>
+                      <Text style={styles.verificado}>✓ Vendedor verificado ›</Text>
+                    </TouchableOpacity>
                   )}
                   {p.description && (
                     <Text style={styles.productoDesc} numberOfLines={1}>{p.description}</Text>
