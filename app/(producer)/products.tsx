@@ -16,13 +16,14 @@ type Product = {
   status: string
   images: string[] | null
   tipo_producto: string | null
+  review_notes?: string | null
 }
 
 const UNIDADES = [
-  { value: 'kg',   label: '⚖️ Kilogramo' },
-  { value: 'unit', label: '📦 Unidad' },
-  { value: 'box',  label: '🗃️ Caja' },
-  { value: 'litre',label: '🧴 Litro' },
+  { value: 'kg',    label: '⚖️ Kilogramo' },
+  { value: 'unit',  label: '📦 Unidad' },
+  { value: 'box',   label: '🗃️ Caja' },
+  { value: 'litre', label: '🧴 Litro' },
 ]
 
 const TIPOS_PRODUCTO = [
@@ -41,7 +42,6 @@ export default function ProductsScreen() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
-  // Campos básicos
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
   const [unit, setUnit] = useState('kg')
@@ -49,7 +49,6 @@ export default function ProductsScreen() {
   const [imageUris, setImageUris] = useState<string[]>([])
   const [existingImages, setExistingImages] = useState<string[]>([])
 
-  // Campos trazabilidad animal
   const [crotal, setCrotal] = useState('')
   const [raza, setRaza] = useState('')
   const [pesoKg, setPesoKg] = useState('')
@@ -72,7 +71,7 @@ export default function ProductsScreen() {
     if (!user) return
     const { data } = await supabase
       .from('products')
-      .select('id, name, price_per_kg, unit_type, status, images, tipo_producto')
+      .select('id, name, price_per_kg, unit_type, status, images, tipo_producto, review_notes')
       .eq('producer_id', user.id)
       .order('created_at', { ascending: false })
     setProducts(data ?? [])
@@ -84,6 +83,7 @@ export default function ProductsScreen() {
     setImageUris([]); setExistingImages([])
     setCrotal(''); setRaza(''); setPesoKg(''); setEdadMeses('')
     setRega(''); setUltimaVacunacion(''); setNotasSanitarias('')
+    setTransporteTipo('estandar'); setTransporteIncluido(false); setTransporteNotas('')
   }
 
   function abrirFormNuevo() {
@@ -100,7 +100,6 @@ export default function ProductsScreen() {
     setTipoProducto(p.tipo_producto ?? 'otro')
     setExistingImages(p.images ?? [])
 
-    // Cargar datos de trazabilidad
     const { data } = await supabase
       .from('products')
       .select('animal_crotal, animal_raza, animal_peso_kg, animal_edad_meses, animal_rega, animal_ultima_vacunacion, animal_notas_sanitarias, transporte_tipo, transporte_incluido, transporte_notas')
@@ -215,7 +214,6 @@ export default function ProductsScreen() {
         transporte_notas: transporteNotas || null,
       }
 
-      // Datos de trazabilidad animal
       if (esAnimal) {
         productData.animal_crotal = crotal || null
         productData.animal_raza = raza || null
@@ -277,7 +275,6 @@ export default function ProductsScreen() {
     ])
   }
 
-  // ── FORMULARIO ──────────────────────────────────────────────────────────────
   if (showing === 'form') {
     const totalFotos = existingImages.length + imageUris.length
     return (
@@ -288,7 +285,6 @@ export default function ProductsScreen() {
         />
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
 
-          {/* Tipo de producto */}
           <View style={styles.campo}>
             <Text style={styles.label}>Tipo de producto</Text>
             <View style={styles.tipoGrid}>
@@ -304,7 +300,6 @@ export default function ProductsScreen() {
             </View>
           </View>
 
-          {/* Aviso trazabilidad */}
           {esAnimal && (
             <View style={styles.avisoAnimal}>
               <Text style={styles.avisoAnimalTitulo}>🐄 Información de trazabilidad</Text>
@@ -314,7 +309,6 @@ export default function ProductsScreen() {
             </View>
           )}
 
-          {/* Fotos */}
           <View style={styles.campo}>
             <Text style={styles.label}>Fotos ({totalFotos}/4)</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.fotosScroll}>
@@ -347,7 +341,6 @@ export default function ProductsScreen() {
             </ScrollView>
           </View>
 
-          {/* Nombre */}
           <View style={styles.campo}>
             <Text style={styles.label}>Nombre del producto</Text>
             <TextInput style={styles.input} value={name} onChangeText={setName}
@@ -355,7 +348,6 @@ export default function ProductsScreen() {
               placeholderTextColor={C.textLight} autoCorrect={false} />
           </View>
 
-          {/* Precio */}
           <View style={styles.campo}>
             <Text style={styles.label}>Precio (€)</Text>
             <TextInput style={styles.input} value={price} onChangeText={setPrice}
@@ -363,7 +355,6 @@ export default function ProductsScreen() {
               keyboardType="decimal-pad" />
           </View>
 
-          {/* Unidad */}
           <View style={styles.campo}>
             <Text style={styles.label}>Unidad de venta</Text>
             <View style={styles.unidadGrid}>
@@ -379,7 +370,6 @@ export default function ProductsScreen() {
             </View>
           </View>
 
-          {/* SECCIÓN TRAZABILIDAD ANIMAL */}
           {esAnimal && (
             <View style={styles.trazabilidadSection}>
               <Text style={styles.sectionTitulo}>🏷️ Datos del animal</Text>
@@ -437,7 +427,6 @@ export default function ProductsScreen() {
             </View>
           )}
 
-          {/* Transporte */}
           <View style={styles.trazabilidadSection}>
             <Text style={styles.sectionTitulo}>🚛 Transporte</Text>
 
@@ -445,10 +434,10 @@ export default function ProductsScreen() {
               <Text style={styles.label}>Tipo de transporte requerido</Text>
               <View style={styles.tipoGrid}>
                 {[
-                  { value: 'estandar',    label: '📦 Mensajería estándar' },
+                  { value: 'estandar',      label: '📦 Mensajería estándar' },
                   { value: 'especializado', label: '🚛 Transporte agrícola especializado' },
-                  { value: 'recogida',    label: '🏡 Recogida en explotación' },
-                  { value: 'negociable',  label: '🤝 A negociar' },
+                  { value: 'recogida',      label: '🏡 Recogida en explotación' },
+                  { value: 'negociable',    label: '🤝 A negociar' },
                 ].map((op) => (
                   <TouchableOpacity key={op.value}
                     style={[styles.tipoBtn, transporteTipo === op.value && styles.tipoBtnActivo]}
@@ -498,7 +487,6 @@ export default function ProductsScreen() {
     )
   }
 
-  // ── LISTADO ──────────────────────────────────────────────────────────────────
   return (
     <View style={styles.flex}>
       <Header titulo="Mis productos"
@@ -533,6 +521,11 @@ export default function ProductsScreen() {
                       {TIPOS_PRODUCTO.find(t => t.value === p.tipo_producto)?.label ?? p.tipo_producto}
                     </Text>
                   )}
+                  {p.status === 'rejected' && p.review_notes ? (
+                    <Text style={styles.motivo}>
+                      Motivo: {p.review_notes.replace('Retirado por RAÍZ: ', '')}
+                    </Text>
+                  ) : null}
                 </View>
                 <View style={styles.cardAcciones}>
                   <View style={[styles.badge,
@@ -626,6 +619,7 @@ const styles = StyleSheet.create({
   productoNombre: { fontSize: 15, fontWeight: '700', color: C.text },
   productoPrecio: { fontSize: 13, color: C.textSub },
   productoTipo:   { fontSize: 11, color: C.primary, fontWeight: '600' },
+  motivo:         { fontSize: 12, color: '#991B1B', fontWeight: '600', lineHeight: 16 },
   cardAcciones:   { alignItems: 'flex-end', gap: 6 },
   badge:          { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   badgeActivo:    { backgroundColor: '#DCFCE7' },

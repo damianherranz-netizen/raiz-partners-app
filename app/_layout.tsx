@@ -14,7 +14,7 @@ const GRUPO_POR_ROL: Record<string, string> = {
   admin:        '(producer)',
 }
 
-const RUTAS_LIBRES = ['verificacion', 'vendedor', 'admin-verificaciones']
+const RUTAS_LIBRES = ['verificacion', 'vendedor', 'admin-verificaciones', 'admin-anuncios']
 
 function RootLayoutNav() {
   const { session, profile, loading } = useAuth()
@@ -79,6 +79,7 @@ function RootLayoutNav() {
       <Stack.Screen name="verificacion" />
       <Stack.Screen name="vendedor" />
       <Stack.Screen name="admin-verificaciones" />
+      <Stack.Screen name="admin-anuncios" />
     </Stack>
   )
 }

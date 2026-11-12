@@ -33,7 +33,7 @@ function MenuModal({ visible, onClose }: { visible: boolean; onClose: () => void
   const { profile } = useAuth()
   const esAdmin = ((profile as any)?.role ?? (profile as any)?.user_role) === 'admin'
   const opciones = [
-    ...(esAdmin ? [{ emoji: '🛡️', label: 'Verificaciones (admin)', ruta: '/admin-verificaciones' }] : []),
+    ...(esAdmin ? [{ emoji: '🛡️', label: 'Verificaciones (admin)', ruta: '/admin-verificaciones' }, { emoji: '🔎', label: 'Todos los anuncios (admin)', ruta: '/admin-anuncios' }] : []),
     { emoji: '�', label: 'Mi carrito',            ruta: '/(producer)/carrito' },
     { emoji: '�📦', label: 'Mis ventas',            ruta: '/(producer)/products' },
     { emoji: '🧾', label: 'Mis pedidos',            ruta: '/(producer)/orders' },

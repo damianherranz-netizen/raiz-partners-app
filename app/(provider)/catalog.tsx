@@ -16,6 +16,7 @@ type ProviderProduct = {
   status: string
   images: string[] | null
   description: string | null
+  review_notes?: string | null
 }
 
 const UNIDADES = [
@@ -47,7 +48,7 @@ export default function CatalogScreen() {
     if (!user) return
     const { data } = await supabase
       .from('provider_products')
-      .select('id, name, price, unit_type, status, images, description')
+      .select('id, name, price, unit_type, status, images, description, review_notes')
       .eq('provider_id', user.id)
       .order('created_at', { ascending: false })
     setProducts(data ?? [])
@@ -106,27 +107,26 @@ export default function CatalogScreen() {
     try {
       const { decode } = require('base64-arraybuffer')
       const FileSystem = require('expo-file-system/legacy')
-      
+
       const ext = uri.split('.').pop()?.toLowerCase() ?? 'jpg'
       const path = `provider-${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      
+
       const base64 = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64
       })
-      
+
       const arrayBuffer = decode(base64)
-      
+
       const { error } = await supabase.storage
         .from('product-images')
         .upload(path, arrayBuffer, { contentType: `image/${ext}`, upsert: true })
-      
+
       if (error) {
         console.log('Upload error:', error.message)
         return null
       }
-      
+
       const { data } = supabase.storage.from('product-images').getPublicUrl(path)
-      console.log('✅ Imagen subida:', data.publicUrl)
       return data.publicUrl
     } catch (e: any) {
       console.log('Upload exception:', e.message)
@@ -146,7 +146,6 @@ export default function CatalogScreen() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Subir nuevas imágenes
       const newUrls: string[] = []
       for (const uri of imageUris) {
         const url = await uploadImage(uri, user.id)
@@ -214,7 +213,6 @@ export default function CatalogScreen() {
     )
   }
 
-  // ── FORMULARIO ─────────────────────────────────────────────────────────────
   if (showing === 'form') {
     const totalFotos = existingImages.length + imageUris.length
     return (
@@ -225,12 +223,10 @@ export default function CatalogScreen() {
         />
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
 
-          {/* Fotos */}
           <View style={styles.campo}>
             <Text style={styles.label}>Fotos del producto ({totalFotos}/4)</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.fotosScroll}>
               <View style={styles.fotosRow}>
-                {/* Fotos existentes */}
                 {existingImages.map((url, idx) => (
                   <View key={`e-${idx}`} style={styles.fotoWrap}>
                     <Image source={{ uri: url }} style={styles.fotoMini} />
@@ -242,7 +238,6 @@ export default function CatalogScreen() {
                     </TouchableOpacity>
                   </View>
                 ))}
-                {/* Fotos nuevas */}
                 {imageUris.map((uri, idx) => (
                   <View key={`n-${idx}`} style={styles.fotoWrap}>
                     <Image source={{ uri }} style={styles.fotoMini} />
@@ -254,7 +249,6 @@ export default function CatalogScreen() {
                     </TouchableOpacity>
                   </View>
                 ))}
-                {/* Botón añadir */}
                 {totalFotos < 4 && (
                   <TouchableOpacity style={styles.fotoAdd} onPress={pickImage}>
                     <Text style={styles.fotoAddEmoji}>📷</Text>
@@ -265,7 +259,6 @@ export default function CatalogScreen() {
             </ScrollView>
           </View>
 
-          {/* Nombre */}
           <View style={styles.campo}>
             <Text style={styles.label}>Nombre del producto</Text>
             <TextInput style={styles.input} value={name} onChangeText={setName}
@@ -273,7 +266,6 @@ export default function CatalogScreen() {
               placeholderTextColor={C.textLight} autoCorrect={false} />
           </View>
 
-          {/* Descripción */}
           <View style={styles.campo}>
             <Text style={styles.label}>Descripción</Text>
             <TextInput style={[styles.input, styles.inputMulti]}
@@ -282,7 +274,6 @@ export default function CatalogScreen() {
               placeholderTextColor={C.textLight} multiline numberOfLines={3} />
           </View>
 
-          {/* Precio */}
           <View style={styles.campo}>
             <Text style={styles.label}>Precio (€)</Text>
             <TextInput style={styles.input} value={price} onChangeText={setPrice}
@@ -290,7 +281,6 @@ export default function CatalogScreen() {
               keyboardType="decimal-pad" />
           </View>
 
-          {/* Unidad */}
           <View style={styles.campo}>
             <Text style={styles.label}>Unidad de venta</Text>
             <View style={styles.unidadGrid}>
@@ -318,7 +308,6 @@ export default function CatalogScreen() {
     )
   }
 
-  // ── LISTADO ─────────────────────────────────────────────────────────────────
   return (
     <View style={styles.flex}>
       <Header titulo="Mi catálogo"
@@ -351,12 +340,18 @@ export default function CatalogScreen() {
                     <Text style={styles.productoDesc} numberOfLines={1}>{p.description}</Text>
                   )}
                   <Text style={styles.productoPrecio}>{p.price} € / {p.unit_type}</Text>
+                  {p.status === 'rejected' && p.review_notes ? (
+                    <Text style={styles.motivo}>
+                      Motivo: {p.review_notes.replace('Retirado por RAÍZ: ', '')}
+                    </Text>
+                  ) : null}
                 </View>
                 <View style={styles.cardAcciones}>
                   <View style={[styles.badge,
-                    p.status === 'active' ? styles.badgeActivo : styles.badgePendiente]}>
+                    p.status === 'active' ? styles.badgeActivo
+                    : p.status === 'rejected' ? styles.badgeRechazado : styles.badgePendiente]}>
                     <Text style={styles.badgeText}>
-                      {p.status === 'active' ? '✓ Activo' : '⏳'}
+                      {p.status === 'active' ? '✓ Activo' : p.status === 'rejected' ? '✗ Retirado' : '⏳'}
                     </Text>
                   </View>
                   <TouchableOpacity style={styles.btnEditar} onPress={() => abrirFormEditar(p)}>
@@ -426,10 +421,12 @@ const styles = StyleSheet.create({
   productoNombre: { fontSize: 15, fontWeight: '700', color: C.text },
   productoDesc:   { fontSize: 12, color: C.textLight },
   productoPrecio: { fontSize: 13, color: C.textSub },
+  motivo:         { fontSize: 12, color: '#991B1B', fontWeight: '600', lineHeight: 16 },
   cardAcciones:   { alignItems: 'flex-end', gap: 6 },
   badge:          { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   badgeActivo:    { backgroundColor: '#DCFCE7' },
   badgePendiente: { backgroundColor: '#FEF9C3' },
+  badgeRechazado: { backgroundColor: '#FEE2E2' },
   badgeText:      { fontSize: 11, fontWeight: '700', color: C.text },
   btnEditar: {
     width: 32, height: 32, borderRadius: 8,
