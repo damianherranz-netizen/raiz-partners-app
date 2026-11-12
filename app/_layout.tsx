@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { AuthProvider, useAuth } from '../lib/auth'
 import { CartProvider } from '../lib/cart'
+import { supabase } from '../lib/supabase'
 import { registerForPushNotifications, savePushToken } from '../lib/notifications'
 
 const GRUPO_POR_ROL: Record<string, string> = {
@@ -14,13 +15,18 @@ const GRUPO_POR_ROL: Record<string, string> = {
   admin:        '(producer)',
 }
 
-const RUTAS_LIBRES = ['verificacion', 'vendedor', 'admin-verificaciones', 'admin-anuncios']
+const RUTAS_LIBRES = [
+  'verificacion', 'vendedor', 'admin-verificaciones',
+  'admin-anuncios', 'admin-denuncias', 'admin-usuarios',
+]
 
 function RootLayoutNav() {
   const { session, profile, loading } = useAuth()
   const segments = useSegments()
   const router = useRouter()
+  const [bloqueado, setBloqueado] = useState<boolean | null>(null)
 
+  const grupo = segments[0] as string | undefined
   const rol: string | undefined =
     (profile as any)?.role ?? (profile as any)?.user_role
   const perfilEsDeEstaSesion =
@@ -28,18 +34,32 @@ function RootLayoutNav() {
   const destino = GRUPO_POR_ROL[rol ?? ''] ?? '(producer)'
 
   useEffect(() => {
+    if (!session?.user) { setBloqueado(false); return }
+    setBloqueado(null)
+    supabase.rpc('my_block_status').then(({ data, error }) => {
+      if (error) { setBloqueado(false); return }
+      setBloqueado(!!(data && data[0] && data[0].blocked))
+    })
+  }, [session?.user?.id, grupo])
+
+  useEffect(() => {
     if (loading) return
-    const grupo = segments[0] as string | undefined
 
     if (!session) {
       if (grupo !== '(auth)') router.replace('/(auth)/welcome')
       return
     }
 
+    if (bloqueado === null) return
+    if (bloqueado) {
+      if (grupo !== 'suspendido') router.replace('/suspendido' as any)
+      return
+    }
+
     if (!perfilEsDeEstaSesion) return
     if (grupo && RUTAS_LIBRES.includes(grupo)) return
     if (grupo !== destino) router.replace(`/${destino}` as any)
-  }, [session, profile, loading, segments])
+  }, [session, profile, loading, segments, bloqueado])
 
   useEffect(() => {
     if (!session?.user) return
@@ -80,6 +100,9 @@ function RootLayoutNav() {
       <Stack.Screen name="vendedor" />
       <Stack.Screen name="admin-verificaciones" />
       <Stack.Screen name="admin-anuncios" />
+      <Stack.Screen name="admin-denuncias" />
+      <Stack.Screen name="admin-usuarios" />
+      <Stack.Screen name="suspendido" />
     </Stack>
   )
 }

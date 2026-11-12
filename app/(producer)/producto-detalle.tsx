@@ -9,6 +9,7 @@ import { getVerifiedSet } from '../../lib/verified'
 import { useCart } from '../../lib/cart'
 import { C } from '../../lib/colors'
 import Header from '../../components/ui/Header'
+import ReportListing from '../../components/ReportListing'
 
 const { width } = Dimensions.get('window')
 
@@ -319,6 +320,7 @@ export default function ProductoDetalleScreen() {
         </View>
 
         {/* Botones */}
+        <ReportListing kind="proveedor" listingId={producto.id} />
         <View style={styles.acciones}>
           <TouchableOpacity
             style={styles.btnContactar}
