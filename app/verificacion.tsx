@@ -6,6 +6,7 @@ import {
 import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
 import { supabase } from '../lib/supabase'
+import { validarNif } from '../lib/nif'
 import { C } from '../lib/colors'
 import Header from '../components/ui/Header'
 
@@ -145,8 +146,8 @@ export default function VerificacionScreen() {
 
   async function enviar() {
     const tax = taxId.trim().toUpperCase()
-    if (!/^[A-Z0-9]{8,10}$/.test(tax)) {
-      Alert.alert('Revisa el NIF/CIF', 'Debe tener entre 8 y 10 caracteres, sin espacios ni guiones.')
+    if (!validarNif(tax)) {
+      Alert.alert('Revisa el NIF/CIF', 'El NIF, NIE o CIF no es válido. Revisa los números y la letra, sin espacios ni guiones.')
       return
     }
     if (cfg.registryRequired && registry.trim().length < 3) {

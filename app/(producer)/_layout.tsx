@@ -7,6 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { C } from '../../lib/colors'
+import { useAuth } from '../../lib/auth'
 
 function TabIcon({ emoji, label, focused }: {
   emoji: string; label: string; focused: boolean
@@ -29,7 +30,10 @@ function MenuModal({ visible, onClose }: { visible: boolean; onClose: () => void
     setTimeout(() => router.push(ruta as any), 100)
   }
 
+  const { profile } = useAuth()
+  const esAdmin = ((profile as any)?.role ?? (profile as any)?.user_role) === 'admin'
   const opciones = [
+    ...(esAdmin ? [{ emoji: '🛡️', label: 'Verificaciones (admin)', ruta: '/admin-verificaciones' }] : []),
     { emoji: '�', label: 'Mi carrito',            ruta: '/(producer)/carrito' },
     { emoji: '�📦', label: 'Mis ventas',            ruta: '/(producer)/products' },
     { emoji: '🧾', label: 'Mis pedidos',            ruta: '/(producer)/orders' },
