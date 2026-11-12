@@ -10,7 +10,7 @@ import { validarNif } from '../lib/nif'
 import { C } from '../lib/colors'
 import Header from '../components/ui/Header'
 
-type Estado = 'none' | 'pending' | 'approved' | 'rejected'
+type Estado = 'none' | 'pending' | 'approved' | 'rejected' | 'revoked'
 type DocSlot = { key: string; label: string; required: boolean }
 type Cfg = {
   titulo: string
@@ -255,9 +255,11 @@ export default function VerificacionScreen() {
       <Header titulo="Verificar mi cuenta" subtitulo={cfg.titulo} accion={volver} />
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
 
-        {estado === 'rejected' && (
+        {(estado === 'rejected' || estado === 'revoked') && (
           <View style={styles.rechazo}>
-            <Text style={styles.rechazoTitulo}>Verificación rechazada</Text>
+            <Text style={styles.rechazoTitulo}>
+              {estado === 'revoked' ? 'Verificación retirada' : 'Verificación rechazada'}
+            </Text>
             <Text style={styles.rechazoTexto}>{notas ?? 'Revisa los datos y vuelve a enviarla.'}</Text>
           </View>
         )}

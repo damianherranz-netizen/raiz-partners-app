@@ -24,6 +24,8 @@ export async function ensureVerified(): Promise<boolean> {
   const mensaje =
     status === 'pending'
       ? 'Tu verificación está en revisión. Podrás publicar cuando se apruebe.'
+      : status === 'revoked'
+      ? `Tu verificación fue retirada: ${v?.review_notes ?? 'contacta con RAÍZ.'}`
       : status === 'rejected'
       ? `Tu verificación fue rechazada: ${v?.review_notes ?? 'revisa tus datos y vuelve a enviarla.'}`
       : 'Para publicar en RAÍZ debes verificar tu cuenta con tus datos fiscales y registros.'
